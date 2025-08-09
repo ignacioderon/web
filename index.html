@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scarshop - Tienda de Fútbol</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <h1>Scarshop</h1>
+    <nav>
+        <a href="#camisetas-actuales">Camisetas actuales</a>
+        <a href="#camisetas-retro">Camisetas retro</a>
+        <a href="#chandals">Chándals</a>
+        <a href="#calzado">Calzado</a>
+    </nav>
+</header>
+
+<main id="catalogo"></main>
+
+<footer>
+    <p>📧 scarshop@gmail.com</p>
+    <p>📸 Instagram: @scarshop</p>
+</footer>
+
+<script>
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQea0p7EojUN_unpNBDZhPLECOMvcNuj_VjFTeIedbHEjmnlcolB79FnxgamK40Y6VZr1pT_YUy44nb/pub?output=csv"; // ← Pega aquí tu URL CSV de Google Sheets
+
+fetch(SHEET_URL)
+    .then(res => res.text())
+    .then(data => {
+        const filas = data.split("\n").map(f => f.split(","));
+        const encabezados = filas.shift();
+        const productos = filas.map(f => {
+            let obj = {};
+            encabezados.forEach((h, i) => obj[h.trim()] = f[i]?.trim());
+            return obj;
+        });
+
+        const categorias = [...new Set(productos.map(p => p.categoria))];
+        const catalogo = document.getElementById("catalogo");
+
+        categorias.forEach(cat => {
+            const section = document.createElement("section");
+            section.id = cat;
+            section.innerHTML = `<h2>${cat.replace("-", " ")}</h2><div class="productos"></div>`;
+            const contenedor = section.querySelector(".productos");
+
+            productos.filter(p => p.categoria === cat).forEach(p => {
+                const item = document.createElement("a");
+                item.href = `producto.html?id=${p.id}`;
+                item.innerHTML = `
+                    <img src="${p.imagen1}" alt="${p.nombre}">
+                    <p>${p.nombre}</p>
+                `;
+                contenedor.appendChild(item);
+            });
+
+            catalogo.appendChild(section);
+        });
+    });
+</script>
+</body>
+</html>

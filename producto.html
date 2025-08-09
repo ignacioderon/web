@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Producto - Scarshop</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <h1><a href="index.html">Scarshop</a></h1>
+</header>
+
+<main class="producto-detalle">
+    <div class="galeria">
+        <button id="prev">&lt;</button>
+        <img id="producto-img" src="" alt="Producto">
+        <button id="next">&gt;</button>
+    </div>
+
+    <div class="info-producto">
+        <h2 id="nombre"></h2>
+        <p class="precio" id="precio"></p>
+        <p class="descripcion" id="descripcion"></p>
+        <p><strong>Tallas disponibles:</strong> <span id="tallas"></span></p>
+    </div>
+</main>
+
+<footer>
+    <p>📧 scarshop@gmail.com</p>
+    <p>📸 Instagram: @scarshop</p>
+</footer>
+
+<script>
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQea0p7EojUN_unpNBDZhPLECOMvcNuj_VjFTeIedbHEjmnlcolB79FnxgamK40Y6VZr1pT_YUy44nb/pub?output=csv"; // ← misma URL que en index.html
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+fetch(SHEET_URL)
+    .then(res => res.text())
+    .then(data => {
+        const filas = data.split("\n").map(f => f.split(","));
+        const encabezados = filas.shift();
+        const productos = filas.map(f => {
+            let obj = {};
+            encabezados.forEach((h, i) => obj[h.trim()] = f[i]?.trim());
+            return obj;
+        });
+
+        const producto = productos.find(p => p.id === id);
+        if (!producto) return;
+
+        document.getElementById("nombre").textContent = producto.nombre;
+        document.getElementById("precio").textContent = `€${producto.precio}`;
+        document.getElementById("descripcion").textContent = producto.descripcion;
+        document.getElementById("tallas").textContent = producto.tallas;
+
+        const imagenes = [producto.imagen1, producto.imagen2, producto.imagen3].filter(Boolean);
+        let indice = 0;
+        const imgElement = document.getElementById("producto-img");
+        imgElement.src = imagenes[indice];
+
+        document.getElementById("next").addEventListener("click", () => {
+            indice = (indice + 1) % imagenes.length;
+            imgElement.src = imagenes[indice];
+        });
+
+        document.getElementById("prev").addEventListener("click", () => {
+            indice = (indice - 1 + imagenes.length) % imagenes.length;
+            imgElement.src = imagenes[indice];
+        });
+    });
+</script>
+</body>
+</html>
